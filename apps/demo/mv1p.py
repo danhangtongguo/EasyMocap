@@ -71,6 +71,8 @@ def mv1pmf_smpl(dataset, args, weight_pose=None, weight_shape=None):
         weight_shape=weight_shape, weight_pose=weight_pose)
     # write out the results
     dataset.no_img = not (args.vis_smpl or args.vis_repro)
+
+    vertices_all = list()
     for nf in tqdm(range(start, end), desc='render'):
         images, annots = dataset[nf]
         param = select_nf(params, nf-start)
@@ -81,8 +83,9 @@ def mv1pmf_smpl(dataset, args, weight_pose=None, weight_shape=None):
             dataset.write_smpl(param_full, nf, mode='smpl_full')
         if args.write_vertices:
             vertices = body_model(return_verts=True, return_tensor=False, **param)
-            write_data = [{'id': 0, 'vertices': vertices[0]}]
-            dataset.write_vertices(write_data, nf)
+            vertices_all.append(vertices[0])
+            # write_data = [{'id': 0, 'vertices': vertices[0]}]
+            # write_vertices(outname, write_data)
         if args.vis_smpl:
             vertices = body_model(return_verts=True, return_tensor=False, **param)
             dataset.vis_smpl(vertices=vertices[0], faces=body_model.faces, images=images, nf=nf, sub_vis=args.sub_vis, add_back=True)
@@ -90,6 +93,14 @@ def mv1pmf_smpl(dataset, args, weight_pose=None, weight_shape=None):
             keypoints = body_model(return_verts=False, return_tensor=False, **param)[0]
             kpts_repro = projectN3(keypoints, dataset.Pall)
             dataset.vis_repro(images, kpts_repro, nf=nf, sub_vis=args.sub_vis, mode='repro_smpl')
+
+    if args.write_vertices:
+        faces_outname = join(dataset.out, 'faces.npy')
+        np.save(faces_outname, body_model.faces)
+        vertices_outname = join(dataset.out, 'vertices.npy')
+        vertices_all = np.asarray(vertices_all)
+        np.save(vertices_outname, vertices_all)
+
 
 if __name__ == "__main__":
     from easymocap.mytools import load_parser, parse_parser
