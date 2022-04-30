@@ -95,9 +95,9 @@ def mv1pmf_smpl(dataset, args, weight_pose=None, weight_shape=None):
             dataset.vis_repro(images, kpts_repro, nf=nf, sub_vis=args.sub_vis, mode='repro_smpl')
 
     if args.write_vertices:
-        faces_outname = join(dataset.out, 'faces.npy')
+        faces_outname = join(dataset.out, 'smpl', 'faces.npy')
         np.save(faces_outname, body_model.faces)
-        vertices_outname = join(dataset.out, 'vertices.npy')
+        vertices_outname = join(dataset.out, 'smpl', 'vertices.npy')
         vertices_all = np.asarray(vertices_all)
         np.save(vertices_outname, vertices_all)
 
